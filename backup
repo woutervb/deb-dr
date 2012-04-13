@@ -11,4 +11,7 @@ import dpkg
 if __name__ == '__main__':
     dpkg = dpkg.Dpkg()
     dpkg_list = dpkg.make_dpkg_listing()
-    print dpkg_list
+    config_files = list()
+    for pkg in dpkg_list:
+        config_files.extend(dpkg.find_altered_config(pkg))
+    print config_files
