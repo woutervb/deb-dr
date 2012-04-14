@@ -5,6 +5,7 @@ for a fully configure bind environment
 from base import Base
 import re
 import os.path
+import logging
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
@@ -14,12 +15,18 @@ class Bind(Base):
     """
     _bind_list = ['bind9']
     _all_files = list()
+
+    def set_debug(self, log_level):
+        self.log = logging.getLogger("Bind")
+        self.log.setLevel(log_level)
+
     def do_check(self, pkg, dpkg_dir, dpkg_exe):
         "Overrule the funtion for our (bind) purpose"
         _included_file_list = list()
         if pkg not in self._bind_list:
             return list()
 
+        self.log.info('Processing for Bind package')
         changed_list = ['/etc/bind/named.conf', ]
         for file_ in changed_list:
             self.bind_include_files(file_, _included_file_list)

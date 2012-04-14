@@ -10,6 +10,7 @@ Deinstalled packages are omitted.
 import re
 import sys
 import hashlib
+import logging
 
 global _status_data
 _status_data = False    # caching
@@ -22,6 +23,11 @@ class Base(object):
         determine which files should end up in a backup.
         In this case based on md5 hash change.
     """
+
+    def set_debug(self, log_level):
+        self.log = logging.getLogger("Base")
+        self.log.setLevel(log_level)
+
     def do_check(self, pkg, dpkg_exe, dpkg_dir):
         """
             This function wil perform the check and return a list of file
