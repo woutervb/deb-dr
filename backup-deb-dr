@@ -5,7 +5,8 @@ current system.
 This executable will create all that is needed for the restore
 """
 
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+
 import dpkg
 
 if __name__ == '__main__':

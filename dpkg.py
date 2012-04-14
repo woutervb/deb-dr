@@ -3,7 +3,7 @@
 This file will implement the dpkg class
 """
 
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
 import subprocess
 import checkers
@@ -36,9 +36,10 @@ class Dpkg:
         """
         files = list()
         for checker in self._config_checker_list:
-            retval = checker.do_check(pkg)
+            retval = checker.do_check(pkg, self._dpkg_exe, self._dpkg_dir)
             if retval:
-                files.append(retval)
+                if retval not in files:
+                    files.extend(retval)
         return files
 
 if __name__ == '__main__':
