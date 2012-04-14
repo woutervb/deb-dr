@@ -8,11 +8,29 @@ This executable will create all that is needed for the restore
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
 import dpkg
+import restore
+import logging
+
+logging.basicConfig(filename='backup-deb-dr.log')
+log =  logging.getLogger("backup-deb-dr")
+
 
 if __name__ == '__main__':
-    dpkg = dpkg.Dpkg()
+    output = '/tmp/restore'
+    log_level = logging.DEBUG
+    log.setLevel(log_level)
+    dpkg = dpkg.Dpkg(log_level)
     dpkg_list = dpkg.make_dpkg_listing()
+    log.info("Obtained a list of packages")
     config_files = list()
     for pkg in dpkg_list:
-        config_files.extend(dpkg.find_altered_config(pkg))
-    print config_files
+        log.debug("Processiong package (%s)" % (pkg))
+        cfg_file = dpkg.find_altered_config(pkg)
+        config_files.extend(cfg_file)
+
+    log.info("Starting with the restore file(s) creation")
+    restore = restore.Restore(log_level)
+    restore.add_files(config_files)
+    restore.add_packages(dpkg_list)
+    restore.create_file(output) # make cli based with default
+    log.info("Restore files created with startname: %s" % (output))
