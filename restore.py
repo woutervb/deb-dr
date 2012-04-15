@@ -37,7 +37,7 @@ class Restore(object):
     def create_file(self, file_):
         try:
             tar = tarfile.open(file_ + '.tar', 'w')
-            script = open(file_ + '.sh', 'w')
+            script = open(file_ + '.sh', 'wb')
         except IOError:
             print "Could not write the file: " + file_
             raise
@@ -49,14 +49,29 @@ class Restore(object):
         tar.close()
 
         self.log.info("Writing restore script")
-        script.write("""
-#!/bin/sh
+        script.write("""#!/bin/sh
 
-sudo (cd / ; tar xf %s etc/apt)
+export TMPDIR=`mktemp -d /tmp/restore.XXXXXX`
+ARCHIVE=`awk '/^__ARCHIVE_BELOW__/ { print NR + 1; exit 0; }' $0`
+tail -n+$ARCHIVE $0 > $TMPDIR/restore.tar
+
+sudo (cd / ; tar xf $TMPDIR/restore.tar etc/apt)
 sudo apt-get update
-sudo apt-get install -y """ % (file_ + '.tar',))
+sudo apt-get install -y """ )
         for pkg in self._package_list:
             script.write(" %s" % (pkg))
+        script.write('\n')
+        script.write('exit 0\n')
+        script.write('\n\n')
+        script.write('__ARCHIVE_BELOW__\n')
+
+        fh = open(file_ + '.tar', 'rb')
+        buf = fh.read(65536)
+        while len(buf) > 0:
+            script.write(buf)
+            buf = fh.read(65536)
+        fh.close()
+        script.close()
 
 
 if __name__ == '__main__':
