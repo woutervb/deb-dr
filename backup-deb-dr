@@ -10,27 +10,44 @@ This executable will create all that is needed for the restore
 import dpkg
 import restore
 import logging
+from optparse import OptionParser
+import sys
 
-logging.basicConfig(filename='backup-deb-dr.log')
-log =  logging.getLogger("backup-deb-dr")
+parser = OptionParser()
+parser.add_option('-d', '--debug', dest='debuglevel', default='DEBUG',
+                        type='string',
+                        help="The debuglevel for logging")
+parser.add_option('-l', '--logfile', dest='logfile', type='string',
+                        default='backup-deb-dr.log',
+                        help="The debuglevel for logging")
+parser.add_option('-f', '--file', dest='filename', type='string', 
+                        default='/tmp/restore', 
+                        help="The filename of the resulting script")
 
+(option, args) = parser.parse_args()
 
-if __name__ == '__main__':
-    output = '/tmp/restore'
-    log_level = logging.DEBUG
-    log.setLevel(log_level)
-    dpkg = dpkg.Dpkg(log_level)
-    dpkg_list = dpkg.make_dpkg_listing()
-    log.info("Obtained a list of packages")
-    config_files = list()
-    for pkg in dpkg_list:
-        log.debug("Processiong package (%s)" % (pkg))
-        cfg_file = dpkg.find_altered_config(pkg)
-        config_files.extend(cfg_file)
+# Setup the runtime (default) configuration settings
+logging.basicConfig(filename=option.logfile)
+log =  logging.getLogger(sys.argv[0])
+output = option.filename
+numeric_level = getattr(logging, option.debuglevel.upper(), None)
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % option.debuglevel)
 
-    log.info("Starting with the restore file(s) creation")
-    restore = restore.Restore(log_level)
-    restore.add_files(config_files)
-    restore.add_packages(dpkg_list)
-    restore.create_file(output) # make cli based with default
-    log.info("Restore files created with startname: %s" % (output))
+# Here we start with the real work
+log.setLevel(numeric_level)
+dpkg = dpkg.Dpkg(numeric_level)
+dpkg_list = dpkg.make_dpkg_listing()
+log.info("Obtained a list of packages")
+config_files = list()
+for pkg in dpkg_list:
+    log.debug("Processiong package (%s)" % (pkg))
+    cfg_file = dpkg.find_altered_config(pkg)
+    config_files.extend(cfg_file)
+
+log.info("Starting with the restore file(s) creation")
+restore = restore.Restore(numeric_level)
+restore.add_files(config_files)
+restore.add_packages(dpkg_list)
+restore.create_file(output) # make cli based with default
+log.info("Restore files created with startname: %s" % (output))
