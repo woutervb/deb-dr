@@ -22,7 +22,6 @@ class Apt(Base):
 
     def do_check(self, pkg, dpkg_dir, dpkg_exe):
         "Overrule the funtion for our (apt) purpose"
-        _included_file_list = list()
         if pkg not in self._apt_list:
             return list()
 

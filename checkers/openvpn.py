@@ -9,47 +9,30 @@ import logging
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
-class Bind(Base):
+class OpenVPN(Base):
     """
-    Implement bind specific checks
+    Implement openvpn specific checks
     """
-    _bind_list = ['bind9']
+    _pkg_list = ['openvpn']
     _all_files = list()
 
     def set_debug(self, log_level):
-        self.log = logging.getLogger("Bind")
+        self.log = logging.getLogger("OpenVPN")
         self.log.setLevel(log_level)
 
     def do_check(self, pkg, dpkg_dir, dpkg_exe):
-        "Overrule the funtion for our (bind) purpose"
-        _included_file_list = list()
-        if pkg not in self._bind_list:
+        "Overrule the funtion for our (Openvpn) purpose"
+        if pkg not in self._pkg_list:
             return list()
 
-        self.log.info('Processing for Bind package')
-        changed_list = ['/etc/bind/named.conf', ]
-        for file_ in changed_list:
-            self.bind_include_files(file_, _included_file_list)
+        self.log.info('Processing for OpenVPN package')
+        filelist = list()
+        # Assume that if /etc/default/openvpn is changed it will be
+        # tracked by the base package
+        for root, subFolders, files in os.walk('/etc/openvpn'):
+            for file_ in files:
+                filelist.append(os.path.join(root, file_))
+                self.log.debug('Adding file (%s)' % (file_))
 
-        return _included_file_list
-
-    def bind_include_files(self, file_, list_):
-        "Check which files are included and referenced so we can include them"
-        try:
-            fh = open(file_, 'r')
-        except IOError:
-            return list()
-        except:
-            raise
-
-        for line in fh.xreadlines():
-            search = re.search(r'^include.+"(.+)"', line, re.I)
-            if not search:
-                search = re.search(r'.+file.+"(.+)"', line, re.I)
-            if search:
-                filename = search.group(1)
-                if os.path.exists(filename):
-                    list_.append(filename)
-                    self.bind_include_files(filename, list_)
-
+        return filelist
 
