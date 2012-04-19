@@ -11,6 +11,7 @@ import re
 import sys
 import hashlib
 import logging
+import os
 
 global _status_data
 _status_data = False    # caching
@@ -115,3 +116,10 @@ class Base(object):
                     _file_md5[search.group(1)] = search.group(2)
 
         return _file_md5
+
+def file_iterator(start_path):
+    filelist = list()
+    for root, subFolders, files in os.walk(start_path):
+        for file_ in files:
+            filelist.append(os.path.join(root, file_))
+    return filelist

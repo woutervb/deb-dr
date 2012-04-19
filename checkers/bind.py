@@ -13,7 +13,7 @@ class Bind(Base):
     """
     Implement bind specific checks
     """
-    _bind_list = ['bind9']
+    _pkg_list = ['bind9']
     _all_files = list()
 
     def set_debug(self, log_level):
@@ -23,7 +23,7 @@ class Bind(Base):
     def do_check(self, pkg, dpkg_dir, dpkg_exe):
         "Overrule the funtion for our (bind) purpose"
         _included_file_list = list()
-        if pkg not in self._bind_list:
+        if pkg not in self._pkg_list:
             return list()
 
         self.log.info('Processing for Bind package')

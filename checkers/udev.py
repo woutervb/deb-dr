@@ -8,21 +8,21 @@ for a fully configure apt
 from base import Base, file_iterator
 import logging
 
-class Apt(Base):
+class Udev(Base):
     """
     Implement apt specific checks
     """
-    _pkg_list = ['apt']
+    _pkg_list = ['udev']
 
     def set_debug(self, log_level):
-        self.log = logging.getLogger("Apt")
+        self.log = logging.getLogger("Udev")
         self.log.setLevel(log_level)
 
     def do_check(self, pkg, dpkg_dir, dpkg_exe):
-        "Overrule the funtion for our (apt) purpose"
+        "Overrule the funtion for our (udev) purpose"
         if pkg not in self._pkg_list:
             return list()
 
-        self.log.info('Processing for Apt package')
+        self.log.info('Processing for udev package')
 
-        return file_iterator('/etc/apt')
+        return file_iterator('/etc/udev')

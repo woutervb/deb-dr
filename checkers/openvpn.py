@@ -2,9 +2,8 @@
 This file implements a class to determine all the files that are needed
 for a fully configure bind environment
 """
-from base import Base
+from base import Base, file_iterator
 import re
-import os.path
 import logging
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
@@ -26,13 +25,6 @@ class OpenVPN(Base):
             return list()
 
         self.log.info('Processing for OpenVPN package')
-        filelist = list()
-        # Assume that if /etc/default/openvpn is changed it will be
-        # tracked by the base package
-        for root, subFolders, files in os.walk('/etc/openvpn'):
-            for file_ in files:
-                filelist.append(os.path.join(root, file_))
-                self.log.debug('Adding file (%s)' % (file_))
-
-        return filelist
+        
+        return file_iterator('/etc/openvpn')
 
